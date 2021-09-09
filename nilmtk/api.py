@@ -256,9 +256,6 @@ class API():
                     for appliance in self.appliances:
                         test_df=next((test.buildings[building].elec[appliance].load(physical_quantity='power', ac_type=self.power['appliance'], sample_period=self.sample_period)))
                         appliance_readings.append(test_df)
-                    
-                    if self.DROP_ALL_NANS:
-                        test_mains , appliance_readings = self.dropna(test_mains,appliance_readings)
                 
                     if self.artificial_aggregate:
                         print ("Creating an Artificial Aggregate")
@@ -267,7 +264,10 @@ class API():
                             test_mains+=app_reading
                     else:
                         test_mains=next(test.buildings[building].elec.mains().load(physical_quantity='power', ac_type=self.power['mains'], sample_period=self.sample_period))
-                        
+                    
+                    if self.DROP_ALL_NANS:
+                        test_mains , appliance_readings = self.dropna(test_mains,appliance_readings)
+                    
                     for i, appliance_name in enumerate(self.appliances):
                         self.test_submeters.append((appliance_name,[appliance_readings[i]]))
                 else:
