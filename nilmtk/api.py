@@ -209,23 +209,25 @@ class API():
             for building in d[dataset]['buildings']:
                 print("Loading building ... ",building)
                 train.set_window(start=d[dataset]['buildings'][building]['start_time'],end=d[dataset]['buildings'][building]['end_time'])
-                train_df = next(train.buildings[building].elec.mains().load(physical_quantity='power', ac_type=self.power['mains'], sample_period=self.sample_period))
-                train_df = train_df[[list(train_df.columns)[0]]]
+            
                 appliance_readings = []
                 
                 for appliance_name in self.appliances:
                     appliance_df = next(train.buildings[building].elec[appliance_name].load(physical_quantity='power', ac_type=self.power['appliance'], sample_period=self.sample_period))
                     appliance_df = appliance_df[[list(appliance_df.columns)[0]]]
                     appliance_readings.append(appliance_df)
-
-                if self.DROP_ALL_NANS:
-                    train_df, appliance_readings = self.dropna(train_df, appliance_readings)
-
+                
                 if self.artificial_aggregate:
                     print ("Creating an Artificial Aggregate")
                     train_df = pd.DataFrame(np.zeros(appliance_readings[0].shape),index = appliance_readings[0].index,columns=appliance_readings[0].columns)
                     for app_reading in appliance_readings:
                         train_df+=app_reading
+                else:
+                    train_df = next(train.buildings[building].elec.mains().load(physical_quantity='power', ac_type=self.power['mains'], sample_period=self.sample_period))
+                    train_df = train_df[[list(train_df.columns)[0]]]
+                
+                if self.DROP_ALL_NANS:
+                    train_df, appliance_readings = self.dropna(train_df, appliance_readings)
 
                 self.train_mains.append(train_df)
                 for i,appliance_name in enumerate(self.appliances):
@@ -247,10 +249,7 @@ class API():
             test=DataSet(d[dataset]['path'])
             for building in d[dataset]['buildings']:
                 test.set_window(start=d[dataset]['buildings'][building]['start_time'],end=d[dataset]['buildings'][building]['end_time'])
-                test_mains=next(test.buildings[building].elec.mains().load(physical_quantity='power', ac_type=self.power['mains'], sample_period=self.sample_period))
-                if self.DROP_ALL_NANS and self.site_only:
-                    test_mains, _= self.dropna(test_mains,[])
-
+                
                 if self.site_only != True:
                     appliance_readings=[]
 
@@ -266,8 +265,16 @@ class API():
                         test_mains = pd.DataFrame(np.zeros(appliance_readings[0].shape),index = appliance_readings[0].index,columns=appliance_readings[0].columns)
                         for app_reading in appliance_readings:
                             test_mains+=app_reading
+                    else:
+                        test_mains=next(test.buildings[building].elec.mains().load(physical_quantity='power', ac_type=self.power['mains'], sample_period=self.sample_period))
+                        
                     for i, appliance_name in enumerate(self.appliances):
                         self.test_submeters.append((appliance_name,[appliance_readings[i]]))
+                else:
+                    test_mains=next(test.buildings[building].elec.mains().load(physical_quantity='power', ac_type=self.power['mains'], sample_period=self.sample_period))
+                
+                if self.DROP_ALL_NANS and self.site_only:
+                    test_mains, _= self.dropna(test_mains,[])
 
                 self.test_mains = [test_mains]
                 self.storing_key = str(dataset) + "_" + str(building) 
