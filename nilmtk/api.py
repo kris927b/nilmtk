@@ -417,7 +417,7 @@ class API:
 
                 self.test_mains = [test_mains]
                 self.storing_key = str(dataset) + "_" + str(building)
-                self.call_predict(self.classifiers, test.metadata["timezone"])
+                self.call_predict(self.methods.items(), test.metadata["timezone"])
 
     def dropna(self, mains_df, appliance_dfs=[]):
         """
