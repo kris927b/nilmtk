@@ -33,7 +33,7 @@ else:
     MAJOR = 0
     MINOR = 4
     MICRO = 0
-    DEV = 1  # For multiple dev pre-releases, please increment this value
+    DEV = 2  # For multiple dev pre-releases, please increment this value
     ISRELEASED = False
     VERSION = "%d.%d.%d" % (MAJOR, MINOR, MICRO)
     QUALIFIER = ""
@@ -104,7 +104,7 @@ setup(
         "hmmlearn>=0.2.1",
         "pyyaml",
         "matplotlib==3.1.3",
-        "jupyterlab"
+        "jupyterlab",
     ],
     description="Estimate the energy consumed by individual appliances from "
     "whole-house power meter readings",

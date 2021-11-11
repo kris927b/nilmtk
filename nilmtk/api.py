@@ -417,7 +417,11 @@ class API:
 
                 self.test_mains = [test_mains]
                 self.storing_key = str(dataset) + "_" + str(building)
-                self.call_predict(self.methods.items(), test.metadata["timezone"])
+                self.call_predict(
+                    self.methods.items(),
+                    test.metadata["timezone"],
+                    f"{dataset}{building}",
+                )
 
     def dropna(self, mains_df, appliance_dfs=[]):
         """
@@ -459,7 +463,7 @@ class API:
                 )
                 print(e)
 
-    def call_predict(self, classifiers, timezone):
+    def call_predict(self, classifiers, timezone, dataset):
 
         """
         This functions computers the predictions on the self.test_mains using all the trained models and then compares different learn't models using the metrics specified
@@ -472,8 +476,8 @@ class API:
                 clf, self.test_mains, self.test_submeters, self.sample_period, timezone
             )
 
-        self.gt_overall = gt_overall
-        self.pred_overall = pred_overall
+        self.gt_overall[dataset] = gt_overall
+        self.pred_overall[dataset] = pred_overall
         if self.site_only != True:
             if gt_overall.size == 0:
                 print("No samples found in ground truth")
